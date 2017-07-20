@@ -1,5 +1,6 @@
 
-SRC_NAME = main_test.c
+SRC_NAME = main_test.c \
+						server.c
 
 OBJ_NAME = $(SRC_NAME:.c=.o)
 
