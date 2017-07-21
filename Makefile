@@ -4,7 +4,7 @@ SRC_NAME = main_test.c \
 
 OBJ_NAME = $(SRC_NAME:.c=.o)
 
-NAME = a.out
+NAME = cryptstore
 
 SRC_PATH = ./sources/
 INC_PATH = ./includes/
@@ -47,3 +47,12 @@ mrproper: clean
 	rm -rf $(NAME)
 
 re: mrproper all
+
+install: all
+	cp $(NAME) /usr/sbin/
+	cp cryptstore.service /etc/systemd/system/
+
+uninstall:
+	systemctl stop $(NAME)
+	rm /usr/sbin/$(NAME)
+	rm /etc/systemd/system/$(NAME).service

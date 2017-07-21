@@ -1,0 +1,6 @@
+[Unit]
+Description=cryptstore deamon
+
+[Service]
+ExecStart=/usr/sbin/cryptstore
+
