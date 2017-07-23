@@ -2,5 +2,5 @@
 Description=cryptstore deamon
 
 [Service]
-ExecStart=/usr/sbin/cryptstore
+ExecStart=/usr/sbin/cryptstored
 
