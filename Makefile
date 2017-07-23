@@ -1,58 +1,39 @@
 
-SRC_NAME = main_test.c \
-						server.c
+PATH_DAEMON = ./daemon/
+PATH_CLIENT = ./client/
 
-OBJ_NAME = $(SRC_NAME:.c=.o)
-
-NAME = cryptstore
-
-SRC_PATH = ./sources/
-INC_PATH = ./includes/
-OBJ_PATH = ./objects/
-
-CC = gcc
-CFLAGS = -Wall -Werror -Wextra
-
-ifeq ($(DEBUG), true)
-	CFLAGS += -g
+ifneq ($(DEBUG), true)
+	DEBUG = false
 endif
-ifeq ($(PROF), true)
-	CFLAGS += -pg
+ifneq ($(PROF), true)
+	PROF = false
 endif
 
-SRC = $(addprefix $(SRC_PATH),$(SRC_NAME))
-OBJ = $(addprefix $(OBJ_PATH),$(OBJ_NAME))
-INC = $(addprefix -I,$(INC_PATH))
-
-
-
-all: $(NAME)
+all:
+	@DEBUG=$(DEBUG) PROF=$(PROF) make -C $(PATH_DAEMON)
+	@DEBUG=$(DEBUG) PROF=$(PROF) make -C $(PATH_CLIENT)
 
 help:
 	@echo "Option variable:"
 	@echo " DEBUG=true\t: debug compilation"
 	@echo " PROF=true\t: profiling compilation"
 
-$(NAME): $(OBJ)
-	$(CC) $(CFLAGS) $(INC) -o $(NAME) $(OBJ)
-
-$(OBJ_PATH)%.o: $(SRC_PATH)%.c
-	@mkdir -p $(OBJ_PATH)
-	$(CC) $(CFLAGS) $(INC) -o $@ -c $<
-
 clean:
-	rm -rf $(OBJ_PATH)
+	@DEBUG=$(DEBUG) PROF=$(PROF) make clean -C $(PATH_DAEMON)
+	@DEBUG=$(DEBUG) PROF=$(PROF) make clean -C $(PATH_CLIENT)
 
-mrproper: clean
-	rm -rf $(NAME)
+mrproper:
+	@DEBUG=$(DEBUG) PROF=$(PROF) make mrproper -C $(PATH_DAEMON)
+	@DEBUG=$(DEBUG) PROF=$(PROF) make mrproper -C $(PATH_CLIENT)
 
-re: mrproper all
+re:
+	@DEBUG=$(DEBUG) PROF=$(PROF) make re -C $(PATH_DAEMON)
+	@DEBUG=$(DEBUG) PROF=$(PROF) make re -C $(PATH_CLIENT)
 
-install: all
-	cp $(NAME) /usr/sbin/
-	cp cryptstore.service /etc/systemd/system/
+install:
+	@DEBUG=$(DEBUG) PROF=$(PROF) make install -C $(PATH_DAEMON)
+	@DEBUG=$(DEBUG) PROF=$(PROF) make install -C $(PATH_CLIENT)
 
 uninstall:
-	systemctl stop $(NAME)
-	rm /usr/sbin/$(NAME)
-	rm /etc/systemd/system/$(NAME).service
+	@DEBUG=$(DEBUG) PROF=$(PROF) make uninstall -C $(PATH_DAEMON)
+	@DEBUG=$(DEBUG) PROF=$(PROF) make uninstall -C $(PATH_CLIENT)
