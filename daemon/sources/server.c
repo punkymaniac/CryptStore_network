@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "global.h"
+#include "glob/core.h"
 
 static int	create_socket(int port)
 {

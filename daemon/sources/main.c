@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "global.h"
+#include "glob/core.h"
 #include "network.h"
 
 int			main(void)
