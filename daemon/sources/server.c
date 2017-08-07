@@ -8,6 +8,16 @@
 
 #include "glob/core.h"
 
+static void	fail_server(char *msgfail)
+{
+	#ifdef DEBUG
+		dprintf(1, "Fail run serveur\n");
+	#endif
+	if (msgfail)
+		perror(msgfail);
+	exit(-1);
+}
+
 static int	create_socket(int port)
 {
 	int									empty;
@@ -18,31 +28,19 @@ static int	create_socket(int port)
 	if ((proto = getprotobyname(PROTOCOL)) == 0x00)
 	{
 		dprintf(2, "ERROR getprotbyname: Bad protocol %s\n", PROTOCOL);
-		exit(-1);
+		fail_server(0x00);
 	}
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);
 	if ((sock = socket(AF_INET, SOCK_STREAM, proto->p_proto)) == -1)
-	{
-		perror("ERROR socket");
-		exit(-1);
-	}
+		fail_server("ERROR socket");
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &empty, sizeof(empty)) == -1)
-	{
-		perror("ERROR setsockopt");
-		exit(-1);
-	}
+		fail_server("ERROR setsockopt");
 	if (bind(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1)
-	{
-		perror("ERROR bind");
-		exit(-1);
-	}
+		fail_server("ERROR bind");
 	if (listen(sock, 10) == -1)
-	{
-		perror("ERROR listen");
-		exit(-1);
-	}
+		fail_server("ERROR listen");
 	return (sock);
 }
 
@@ -60,11 +58,8 @@ void				run_server(void)
 	{
 		FD_ZERO(&rfds);
 		FD_SET(sock, &rfds);
-		if (select(sock + 1, &rfds, NULL, NULL, &time) == -1)
-		{
-			perror("ERROR select");
-			exit(-1);
-		}
+		if (select(sock + 1, &rfds, 0x00, 0x00, &time) == -1)
+			fail_server("ERROR select");
 		if (FD_ISSET(sock, &rfds))
 		{
 			cslen = sizeof(csin);
