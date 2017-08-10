@@ -33,7 +33,7 @@ static int	create_socket(int port)
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	sin.sin_addr.s_addr = htonl(INADDR_ANY);
-	if ((sock = socket(AF_INET, SOCK_STREAM, proto->p_proto)) == -1)
+	if ((sock = socket(PF_INET, SOCK_STREAM, proto->p_proto)) == -1)
 		fail_server("ERROR socket");
 	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &empty, sizeof(empty)) == -1)
 		fail_server("ERROR setsockopt");
