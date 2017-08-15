@@ -5,6 +5,7 @@
 
 // client.c
 void			run_shell(void);
+int				connect_daemon(void);
 
 // command.h
 void			run_cmd(char *cmd, char **arg);

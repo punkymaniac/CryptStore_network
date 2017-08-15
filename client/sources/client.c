@@ -1,6 +1,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 
 #include "glob/core.h"
 #include "client.h"
@@ -54,4 +57,25 @@ void			run_shell(void)
 			free(arg);
 		}
 	}
+}
+
+int				connect_daemon(void)
+{
+	int										sock;
+	struct sockaddr_un		sun;
+
+	sun.sun_family = AF_UNIX;
+	strcpy(sun.sun_path, UNIX_SOCKET_PATH);
+	if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) == -1)
+	{
+		perror("ERROR socket");
+		return (-1);
+	}
+	if (connect(sock, (struct sockaddr *)&sun, sizeof(sun)) == -1)
+	{
+		perror("ERROR connect");
+		return (-1);
+	}
+	send(sock, "init ", 5, 0x00);
+	return (sock);
 }

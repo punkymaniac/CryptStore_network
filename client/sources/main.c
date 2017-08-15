@@ -10,7 +10,12 @@ int			main(void)
 		dprintf(1, "=> Run client\n");
 	#endif
 
-	run_shell();
+	int			sockd;
+
+	if ((sockd = connect_daemon()) != -1)
+	{
+		run_shell();
+	}
 
 	#ifdef DEBUG
 		dprintf(1, "=> Exit client\n");

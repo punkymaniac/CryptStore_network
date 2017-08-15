@@ -1,4 +1,5 @@
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -16,6 +17,23 @@ static void	fail_server(char *msgfail)
 	if (msgfail)
 		perror(msgfail);
 	exit(-1);
+}
+
+static int	create_unix_socket(void)
+{
+	int									sock;
+	struct sockaddr_un	sun;
+
+	sun.sun_family = AF_UNIX;
+	strcpy(sun.sun_path, UNIX_SOCKET_PATH);
+	unlink(UNIX_SOCKET_PATH);
+	if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) == -1)
+		fail_server("ERROR socket local");
+	if (bind(sock, (struct sockaddr *)&sun, sizeof(sun)) == -1)
+		fail_server("ERROR bind local");
+	if (listen(sock, 1) == -1)
+		fail_server("ERROR listen local");
+	return (sock);
 }
 
 static int	create_socket(int port)
@@ -50,15 +68,21 @@ void				run_server(void)
 	struct timeval			time = {0, 0};
 	int									sock;
 	int									sockcli;
+	int									socku;
 	unsigned int				cslen;
 	struct sockaddr_in	csin;
+	struct sockaddr_un	csun;
+	int									maxsock;
 
 	sock = create_socket(DEFAULT_PORT);
+	socku = create_unix_socket();
 	while (1)
 	{
 		FD_ZERO(&rfds);
 		FD_SET(sock, &rfds);
-		if (select(sock + 1, &rfds, 0x00, 0x00, &time) == -1)
+		FD_SET(socku, &rfds);
+		maxsock = (sock > socku) ? sock + 1 : socku + 1;
+		if (select(maxsock + 1, &rfds, 0x00, 0x00, &time) == -1)
 			fail_server("ERROR select");
 		if (FD_ISSET(sock, &rfds))
 		{
@@ -82,6 +106,24 @@ void				run_server(void)
 				}
 				dprintf(1, "Client connected: %s:%d\n", ipstr, ntohs(csin.sin_port));
 			}
+			close(sockcli);
+		}
+		else if (FD_ISSET(socku, &rfds))
+		{
+			cslen = sizeof(csun);
+			memset(&csun, 0, sizeof(cslen));
+			if ((sockcli = accept(socku, (struct sockaddr *)&csun, &cslen)) == -1)
+			{
+				#ifndef DEBUG
+					perror("ERROR accept local");
+				#endif
+			}
+			dprintf(1, "Client local connected");
+			char			b[100] = {0};
+			int				r = 0;
+			r = recv(sockcli, &b, 100, 0x00);
+			b[r] = 0x00;
+			dprintf(1, "RECV: [%s]\n", b);
 			close(sockcli);
 		}
 	}
