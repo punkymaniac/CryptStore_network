@@ -81,7 +81,7 @@ void				run_server(void)
 		FD_ZERO(&rfds);
 		FD_SET(sock, &rfds);
 		FD_SET(socku, &rfds);
-		maxsock = (sock > socku) ? sock + 1 : socku + 1;
+		maxsock = (sock > socku) ? sock : socku;
 		if (select(maxsock + 1, &rfds, 0x00, 0x00, &time) == -1)
 			fail_server("ERROR select");
 		if (FD_ISSET(sock, &rfds))
