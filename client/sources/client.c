@@ -41,11 +41,10 @@ static char			**st_parse(char *buf)
 
 void			run_shell(void)
 {
-	char		buf[SIZE_BUFFER];
+	char		buf[SIZE_BUFFER] = {0};
 	int			nbr;
 	char		**arg;
 
-	memset(buf, 0, SIZE_BUFFER);
 	while (1)
 	{
 		write(1, "> ", 2);
@@ -63,6 +62,7 @@ int				connect_daemon(void)
 {
 	int										sock;
 	struct sockaddr_un		sun;
+	int										nrecv;
 
 	sun.sun_family = AF_UNIX;
 	strcpy(sun.sun_path, UNIX_SOCKET_PATH);
@@ -76,6 +76,19 @@ int				connect_daemon(void)
 		perror("ERROR connect");
 		return (-1);
 	}
-	send(sock, "init ", 5, 0x00);
-	return (sock);
+	nrecv = recv(sock, 0x00, 1, 0x00);
+	if (nrecv != 0)
+	{
+		return (sock);
+	}
+	dprintf(1, "One client is already connected\n");
+	close(sock);
+	return (-1);
+}
+
+struct infod		*info_daemon(void)
+{
+	static struct infod		info = {0};
+
+	return (&info);
 }

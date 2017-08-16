@@ -10,10 +10,13 @@ int			main(void)
 		dprintf(1, "=> Run client\n");
 	#endif
 
-	int			sockd;
+	int							sockd;
+	struct infod		*infod;
 
+	infod = info_daemon();
 	if ((sockd = connect_daemon()) != -1)
 	{
+		infod->socket = sockd;
 		run_shell();
 	}
 

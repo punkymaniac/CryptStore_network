@@ -1,8 +1,10 @@
 #include <string.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "glob/core.h"
+#include "client.h"
 #include "command.h"
 
 static struct cmd			*st_get_cmd(void)
@@ -49,6 +51,10 @@ void					run_cmd(char *cmd, char **arg)
 void					c_exit(char **arg)
 {
 	(void)arg;
+	struct infod		*infod;
+
+	infod = info_daemon();
+	close(infod->socket);
 	#ifdef DEBUG
 		dprintf(1, "=> Exit client\n");
 	#endif

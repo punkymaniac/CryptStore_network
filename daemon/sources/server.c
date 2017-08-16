@@ -65,10 +65,12 @@ static int	create_socket(int port)
 void				run_server(void)
 {
 	fd_set							rfds;
+	fd_set							sockfd;
 	struct timeval			time = {0, 0};
 	int									sock;
 	int									sockcli;
 	int									socku;
+	int									sockucli;
 	unsigned int				cslen;
 	struct sockaddr_in	csin;
 	struct sockaddr_un	csun;
@@ -76,16 +78,20 @@ void				run_server(void)
 
 	sock = create_socket(DEFAULT_PORT);
 	socku = create_unix_socket();
+	sockucli = 0;
+	FD_ZERO(&sockfd);
+	FD_SET(sock, &sockfd);
+	FD_SET(socku, &sockfd);
+	maxsock = (sock > socku) ? sock : socku;
 	while (1)
 	{
 		FD_ZERO(&rfds);
-		FD_SET(sock, &rfds);
-		FD_SET(socku, &rfds);
-		maxsock = (sock > socku) ? sock : socku;
+		rfds = sockfd;
 		if (select(maxsock + 1, &rfds, 0x00, 0x00, &time) == -1)
 			fail_server("ERROR select");
 		if (FD_ISSET(sock, &rfds))
 		{
+			// if connexion p2p
 			cslen = sizeof(csin);
 			memset(&csin, 0, sizeof(csin));
 			if ((sockcli = accept(sock, (struct sockaddr *)&csin, &cslen)) == -1)
@@ -110,6 +116,7 @@ void				run_server(void)
 		}
 		else if (FD_ISSET(socku, &rfds))
 		{
+			// if connexion client local
 			cslen = sizeof(csun);
 			memset(&csun, 0, sizeof(cslen));
 			if ((sockcli = accept(socku, (struct sockaddr *)&csun, &cslen)) == -1)
@@ -118,13 +125,37 @@ void				run_server(void)
 					perror("ERROR accept local");
 				#endif
 			}
-			dprintf(1, "Client local connected");
+			if (sockucli == 0)
+			{
+				dprintf(1, "Client local connected\n");
+				sockucli = sockcli;
+				maxsock = (maxsock > sockucli) ? maxsock : sockucli;
+				FD_SET(sockucli, &sockfd);
+				send(sockucli, "", 1, 0x00);
+			}
+			else
+			{
+				close(sockcli);
+			}
+		}
+		else if (FD_ISSET(sockucli, &rfds))
+		{
+			// if reception donne client local
 			char			b[100] = {0};
 			int				r = 0;
-			r = recv(sockcli, &b, 100, 0x00);
-			b[r] = 0x00;
-			dprintf(1, "RECV: [%s]\n", b);
-			close(sockcli);
+			r = recv(sockucli, &b, 100, 0x00);
+			if (r == 0)
+			{
+				dprintf(1, "Client local disconected\n");
+				FD_CLR(sockucli, &sockfd);
+				close(sockucli);
+				sockucli = 0;
+			}
+			else
+			{
+				b[r] = 0x00;
+				dprintf(1, "RECV: %d [%s]\n", r, b);
+			}
 		}
 	}
 	close(sock);
