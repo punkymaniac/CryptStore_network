@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "glob/core.h"
-#include "network.h"
+#include "server.h"
 
 int			main(void)
 {

@@ -1,6 +1,8 @@
 
 SRC_NAME = main.c \
-						server.c
+						server.c \
+						localclient.c \
+						p2p.c
 
 OBJ_NAME = $(SRC_NAME:.c=.o)
 
