@@ -2,11 +2,21 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "glob/core.h"
 #include "server.h"
 #include "localclient.h"
 #include "p2p.h"
+
+static void			stop_service_signal(int sig)
+{
+	(void)sig;
+	#ifdef DEBUG
+		dprintf(1, "=> Exit daemon\n");
+	#endif
+	exit(0);
+}
 
 void			fail_server(char *msgfail)
 {
@@ -27,6 +37,7 @@ void				run_server(void)
 	int									maxsock;
 	struct timespec			timeout;
 
+	signal(SIGTERM, stop_service_signal); // controle stop service
 	sock = create_p2p_socket(DEFAULT_PORT);
 	socku = create_unix_socket();
 	timeout.tv_sec = 0;
