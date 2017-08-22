@@ -1,5 +1,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <time.h>
 #include <unistd.h>
 #include <stdio.h>
 
@@ -80,19 +81,16 @@ void			connect_local(int socket)
 	}
 }
 
-void			control_client(void)
+void			control_client(struct timespec *timeout)
 {
 	static fd_set						sockfd;
-	static struct timeval		time = {0, 0};
 	int											*sockucli;
 
 	sockucli = get_socket();
 	FD_ZERO(&sockfd);
 	FD_SET(*sockucli, &sockfd);
-	if (select((*sockucli) + 1, &sockfd, 0x00, 0x00, &time) == -1)
-	{	
-		perror("ERROR select client local");
-	}
+	if (pselect((*sockucli) + 1, &sockfd, 0x00, 0x00, timeout, 0x00) == -1)
+		perror("ERROR pselect client local");
 	if (FD_ISSET(*sockucli, &sockfd))
 	{
 		recv_local();

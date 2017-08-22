@@ -1,8 +1,10 @@
 #include <unistd.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "glob/core.h"
+#include "server.h"
 #include "localclient.h"
 #include "p2p.h"
 
@@ -23,10 +25,12 @@ void				run_server(void)
 	int									sock;
 	int									socku;
 	int									maxsock;
-	struct timeval			time = {0, 0};
+	struct timespec			timeout;
 
 	sock = create_p2p_socket(DEFAULT_PORT);
 	socku = create_unix_socket();
+	timeout.tv_sec = 0;
+	timeout.tv_nsec = NSEC_REFRESH;
 	FD_ZERO(&sockfd);
 	FD_SET(sock, &sockfd);
 	FD_SET(socku, &sockfd);
@@ -35,8 +39,8 @@ void				run_server(void)
 	{
 		FD_ZERO(&rfds);
 		rfds = sockfd;
-		if (select(maxsock + 1, &rfds, 0x00, 0x00, &time) == -1)
-			fail_server("ERROR select");
+		if (pselect(maxsock + 1, &rfds, 0x00, 0x00, &timeout, 0x00) == -1)
+			fail_server("ERROR pselect");
 		if (FD_ISSET(sock, &rfds)) // if connexion p2p
 		{
 			recv_new_connection(sock);
@@ -45,6 +49,6 @@ void				run_server(void)
 		{
 			connect_local(socku);
 		}
-		control_client();
+		control_client(&timeout);
 	}
 }
