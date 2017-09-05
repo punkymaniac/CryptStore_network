@@ -17,7 +17,7 @@ static char			**st_parse(char *buf)
 	posarg = 0;
 	word = 0;
 	arg = (char **)malloc(sizeof(char *) * 100);
-	for (i = 0; buf[i]; ++i)
+	for (i = 0; buf[i] && buf[i] != 0x0A; ++i)
 	{
 		if (word == 0 && buf[i] != 0x20 && buf[i] != 0x09 && buf[i] != 0x0B)
 		{
@@ -33,7 +33,7 @@ static char			**st_parse(char *buf)
 			word = 0;
 		}
 	}
-	buf[i - 1] = 0x00;
+	buf[i] = 0x00;
 	arg[posarg] = 0x00;
 	return (arg);
 }
