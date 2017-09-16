@@ -36,6 +36,8 @@ void					run_cmd(char *cmd, char **arg)
 	short				idcmd;
 
 	acmd = st_get_cmd();
+	if (cmd[0] == 0x00)
+		return ;
 	idcmd = st_search_cmd(cmd);
 	if (idcmd == -1)
 		dprintf(2, "%s: command not found\n", cmd);

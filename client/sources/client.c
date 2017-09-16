@@ -34,6 +34,11 @@ static char			**st_parse(char *buf)
 		}
 	}
 	buf[i] = 0x00;
+	if (posarg == 0)
+	{
+		arg[posarg] = &buf[i];
+		++posarg;
+	}
 	arg[posarg] = 0x00;
 	return (arg);
 }
