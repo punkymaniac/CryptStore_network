@@ -6,6 +6,7 @@
 
 #include "glob/core.h"
 #include "server.h"
+#include "config.h"
 #include "localclient.h"
 #include "p2p.h"
 
@@ -36,9 +37,11 @@ void				run_server(void)
 	int									socku;
 	int									maxsock;
 	struct timespec			timeout;
+	struct conf					*config;
 
 	signal(SIGTERM, stop_service_signal); // controle stop service
-	sock = create_p2p_socket(DEFAULT_PORT);
+	config = get_config();
+	sock = create_p2p_socket(config->listen_port);
 	socku = create_unix_socket();
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = NSEC_REFRESH;
