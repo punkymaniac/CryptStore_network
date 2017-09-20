@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -6,6 +7,16 @@
 #include "glob/core.h"
 #include "client.h"
 #include "command.h"
+
+static void						close_socket_daemon(int sig)
+{
+	(void)sig;
+	dprintf(2, "failed : daemon is killed\n");
+	#ifdef DEBUG
+		dprintf(1, "=> Exit client\n");
+	#endif
+	exit(1);
+}
 
 static struct cmd			*st_get_cmd(void)
 {
@@ -47,6 +58,7 @@ void					run_cmd(char *cmd, char **arg)
 			dprintf(1, "Execute command: %s\n", cmd);
 		#endif
 		acmd[idcmd].func(arg);
+		signal(SIGPIPE, close_socket_daemon);
 	}
 }
 
