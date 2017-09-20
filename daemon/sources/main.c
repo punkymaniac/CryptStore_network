@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,10 +30,33 @@ static void								arg_port(int nbrarg, char **av)
 	#endif
 }
 
+static void							arg_address(int nbrarg, char **av)
+{
+	(void)nbrarg;
+	struct conf					*config;
+	int									size;
+	struct sockaddr_in	sa;
+
+	config = get_config();
+	size = strlen(av[0]);
+	// check valid format ipv4
+	if (inet_pton(AF_INET, av[0], &(sa.sin_addr)) == 0)
+	{
+		dprintf(2, "[CONFIG] error address is not valid\n");
+		return ;
+	}
+	memcpy(config->host_address, av[0], size);
+	config->host_address[size] = 0x00;
+	#ifdef DEBUG
+		dprintf(1, "[CONFIG] Host address: %s\n", config->host_address);
+	#endif
+}
+
 static struct argument		*st_get_arg(void)
 {
 	static struct argument	array[10] = {
 		{"-p", "--port", 1, arg_port},
+		{"-a", "--address", 1, arg_address},
 		{0x00, 0x00, 0, 0x00}
 	};
 	return (array);
@@ -41,7 +65,8 @@ static struct argument		*st_get_arg(void)
 struct conf						*get_config(void)
 {
 	static struct conf	config = {
-			.listen_port = DEFAULT_LISTEN_PORT
+			.listen_port = DEFAULT_LISTEN_PORT,
+			.host_address = DEFAULT_HOST_ADDRESS
 	};
 	return (&config);
 }
