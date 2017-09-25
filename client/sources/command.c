@@ -20,6 +20,10 @@ static void						close_socket_daemon(int sig)
 
 static struct cmd			*st_get_cmd(void)
 {
+	/*
+	array doit avoir le meme ordre que array dans st_get_cmd du fichier
+	daemon/sources/command.c
+	*/
 	static struct cmd		array[10] = {
 		{"exit", &c_exit},
 		{0x00, 0x00}
@@ -57,14 +61,15 @@ void					run_cmd(char *cmd, char **arg)
 		#ifdef DEBUG
 			dprintf(1, "Execute command: %s\n", cmd);
 		#endif
-		acmd[idcmd].func(arg);
+		acmd[idcmd].func(idcmd, arg);
 		signal(SIGPIPE, close_socket_daemon);
 	}
 }
 
-void					c_exit(char **arg)
+void					c_exit(short idcmd, char **arg)
 {
 	(void)arg;
+	(void)idcmd;
 	struct infod		*infod;
 
 	infod = info_daemon();

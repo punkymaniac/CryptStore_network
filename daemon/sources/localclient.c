@@ -6,6 +6,7 @@
 
 #include "glob/core.h"
 #include "server.h"
+#include "command.h"
 
 static int		*get_socket(void)
 {
@@ -34,12 +35,12 @@ int			create_unix_socket(void)
 static void			recv_local(void)
 {
 	int				*sockucli;
-	char			b[100] = {0};
-	int				r = 0;
+	char			buffer[100] = {0};
+	int				size;
 
 	sockucli = get_socket();
-	r = recv(*sockucli, &b, 100, 0x00);
-	if (r == 0)
+	size = recv(*sockucli, &buffer, 100, 0x00);
+	if (size == 0)
 	{
 		dprintf(1, "Client local disconected\n");
 		close(*sockucli);
@@ -47,8 +48,10 @@ static void			recv_local(void)
 	}
 	else
 	{
-		b[r] = 0x00;
-		dprintf(1, "RECV: %d [%s]\n", r, b);
+		buffer[size] = 0x00;
+		dprintf(1, "RECV: %d [%s]\n", size, buffer);
+		if (size != -1)
+			process_cmd(buffer, size);
 	}
 }
 

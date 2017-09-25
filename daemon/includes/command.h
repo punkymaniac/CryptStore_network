@@ -4,10 +4,10 @@
 struct			cmd
 {
 	char			*name;
-	void			(*func)(short idcmd, char **arg);
+	void			(*func)(char *data);
 };
 
 // command.c
-void				c_exit(short idcmd, char **arg);
+void				process_cmd(char *data, int size);
 
 #endif
