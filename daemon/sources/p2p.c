@@ -17,7 +17,7 @@ int			create_p2p_socket(int port)
 
 	if ((proto = getprotobyname(PROTOCOL)) == 0x00)
 	{
-		dprintf(2, "ERROR getprotbyname: Bad protocol %s\n", PROTOCOL);
+		dprintf(2, "ERROR getprotobyname: Bad protocol %s\n", PROTOCOL);
 		fail_server(0x00);
 	}
 	sin.sin_family = AF_INET;
@@ -59,7 +59,7 @@ void			recv_new_connection(int socket)
 				perror("ERROR inet_ntop");
 			#endif
 		}
-		dprintf(1, "Client connected: %s:%d\n", ipstr, ntohs(csin.sin_port));
+		dprintf(1, "Client connected: %s:%d\n", ipstr, csin.sin_port);
 	}
 	close(sockcli);
 }
