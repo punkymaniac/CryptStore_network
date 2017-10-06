@@ -9,5 +9,6 @@ struct			cmd
 
 // command.c
 void				process_cmd(char *data, int size);
+void				c_addhost(char *data);
 
 #endif

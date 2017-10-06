@@ -9,6 +9,7 @@
 #include "config.h"
 #include "localclient.h"
 #include "p2p.h"
+#include "p2p_host.h"
 
 static void			stop_service_signal(int sig)
 {
@@ -43,6 +44,7 @@ void				run_server(void)
 	config = get_config();
 	sock = create_p2p_socket(config->listen_port);
 	socku = create_unix_socket();
+	init_hosts(config->host_address, config->listen_port);
 	timeout.tv_sec = 0;
 	timeout.tv_nsec = NSEC_REFRESH;
 	FD_ZERO(&sockfd);

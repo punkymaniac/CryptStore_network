@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <sys/select.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -31,6 +32,36 @@ int			create_p2p_socket(int port)
 		fail_server("ERROR bind");
 	if (listen(sock, 10) == -1)
 		fail_server("ERROR listen");
+	return (sock);
+}
+
+int				connect_p2p(struct in_addr ip, int port)
+{
+	int									empty;
+	int										sock;
+	struct protoent			*proto;
+	struct sockaddr_in		sin;
+
+	sin.sin_family = AF_INET;
+	sin.sin_port = htons(port);
+	sin.sin_addr = ip;
+	if ((proto = getprotobyname(PROTOCOL)) == 0x00)
+	{
+		dprintf(2, "ERROR getprotobyname: Bad protocol %s\n", PROTOCOL);
+		return (-1);
+	}
+	if ((sock = socket(PF_INET, SOCK_STREAM, proto->p_proto)) == -1)
+	{
+		return (-1);
+	}
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &empty, sizeof(empty)) == -1)
+	{
+		return (-1);
+	}
+	if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1)
+	{
+		return (-1);
+	}
 	return (sock);
 }
 
