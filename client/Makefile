@@ -1,6 +1,5 @@
 
 SRC_NAME = main.c \
-						client.c \
 						command.c
 
 OBJ_NAME = $(SRC_NAME:.c=.o)

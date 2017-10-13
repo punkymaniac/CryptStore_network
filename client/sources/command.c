@@ -28,7 +28,6 @@ static struct cmd			*st_get_cmd(void)
 	daemon/sources/command.c
 	*/
 	static struct cmd		array[10] = {
-		{"exit", &c_exit},
 		{"addhost", &c_addhost},
 		{0x00, 0x00}
 	};
@@ -49,7 +48,7 @@ static short					st_search_cmd(char *str)
 	return (-1);
 }
 
-void					run_cmd(char *cmd, char **arg)
+void					exec_cmd(char *cmd, char **arg)
 {
 	struct cmd	*acmd;
 	short				idcmd;
@@ -68,20 +67,6 @@ void					run_cmd(char *cmd, char **arg)
 		acmd[idcmd].func(idcmd, arg);
 		signal(SIGPIPE, close_socket_daemon);
 	}
-}
-
-void					c_exit(short idcmd, char **arg)
-{
-	(void)arg;
-	(void)idcmd;
-	struct infod		*infod;
-
-	infod = info_daemon();
-	close(infod->socket);
-	#ifdef DEBUG
-		dprintf(1, "=> Exit client\n");
-	#endif
-	exit(0);
 }
 
 void					c_addhost(short idcmd, char **arg)

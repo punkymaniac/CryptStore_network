@@ -14,7 +14,6 @@ static struct cmd			*st_get_cmd(void)
 	client/sources/localclient.c
 	*/
 	static struct cmd		array[10] = {
-		{"exit", 0x00},
 		{"addhost", &c_addhost},
 		{0x00, 0x00}
 	};

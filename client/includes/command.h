@@ -8,7 +8,6 @@ struct			cmd
 };
 
 // command.c
-void				c_exit(short idcmd, char **arg);
 void				c_addhost(short idcmd, char **arg);
 
 #endif
