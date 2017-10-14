@@ -13,7 +13,6 @@ int			main(int ac, char **av)
 		dprintf(1, "=> Run client\n");
 	#endif
 
-	int							sockd;
 	struct infod		*infod;
 
 	if (ac == 1)
@@ -22,11 +21,8 @@ int			main(int ac, char **av)
 		return (0);
 	}
 	infod = info_daemon();
-	if ((sockd = connect_daemon()) != -1)
-	{
-		infod->socket = sockd;
-		exec_cmd(av[1], &(av[2]));
-	}
+	infod->socket = connect_daemon();
+	exec_cmd(av[1], &(av[2]));
 
 	#ifdef DEBUG
 		dprintf(1, "=> Exit client\n");
@@ -38,7 +34,6 @@ int				connect_daemon(void)
 {
 	int										sock;
 	struct sockaddr_un		sun;
-	int										nrecv;
 
 	sun.sun_family = AF_UNIX;
 	strcpy(sun.sun_path, UNIX_SOCKET_PATH);
@@ -52,14 +47,7 @@ int				connect_daemon(void)
 		perror("ERROR connect");
 		return (-1);
 	}
-	nrecv = recv(sock, 0x00, 1, 0x00);
-	if (nrecv != 0)
-	{
-		return (sock);
-	}
-	dprintf(1, "One client is already connected\n");
-	close(sock);
-	return (-1);
+	return (sock);
 }
 
 struct infod		*info_daemon(void)

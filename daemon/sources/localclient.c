@@ -76,7 +76,6 @@ void			connect_local(int socket)
 	{
 		dprintf(1, "Client local connected\n");
 		*sockucli = sockcli;
-		send(*sockucli, "", 1, 0x00);
 	}
 	else
 	{
@@ -90,8 +89,6 @@ void			control_client(struct timespec *timeout)
 	int											*sockucli;
 
 	sockucli = get_socket();
-	if (*sockucli == 0)
-		return ;
 	FD_ZERO(&sockfd);
 	FD_SET(*sockucli, &sockfd);
 	if (pselect((*sockucli) + 1, &sockfd, 0x00, 0x00, timeout, 0x00) == -1)
