@@ -70,4 +70,3 @@ void								new_host(struct in_addr ip, unsigned short port)
 
 	close(sock);
 }
-

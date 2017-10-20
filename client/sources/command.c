@@ -6,8 +6,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "glob/core.h"
+#include "glob/host_struct.h"
 #include "client.h"
 #include "command.h"
 
@@ -29,6 +31,7 @@ static struct cmd			*st_get_cmd(void)
 	*/
 	static struct cmd		array[10] = {
 		{"addhost", &c_addhost},
+		{"listhost", &c_listhost},
 		{0x00, 0x00}
 	};
 	return (array);
@@ -114,5 +117,71 @@ void					c_addhost(short idcmd, char **arg)
 	memcpy(&data[size], &port, sizeof(unsigned short));
 	size += sizeof(unsigned short);
 	if (send(infod->socket, data, size, 0) == -1)
-		perror("send error:");
+		perror("send error");
+}
+
+void					c_listhost(short idcmd, char **arg)
+{
+	(void)arg;
+	struct infod				*infod;
+	char								data[10] = {0};
+	short								size;
+	fd_set							sockfd;
+	int									recvo;
+	struct timespec			timeout;
+	struct host					host;
+	char								lastconnect[100];
+	int									lasttime;
+	struct tm						*local;
+
+	infod = info_daemon();
+	size = 0;
+	timeout.tv_sec = 0;
+	timeout.tv_nsec = NSEC_REFRESH;
+	memcpy(data, &idcmd, sizeof(idcmd));
+	size += sizeof(idcmd);
+	if (send(infod->socket, data, size, 0) == -1)
+		perror("send error");
+	while (1)
+	{
+		FD_ZERO(&sockfd);
+		FD_SET(infod->socket, &sockfd);
+		if (pselect(infod->socket + 1, &sockfd, 0x00, 0x00, &timeout, 0x00) == -1)
+			perror("ERROR pselect client");
+		if (FD_ISSET(infod->socket, &sockfd))
+		{
+			recvo = recv(infod->socket, &host, sizeof(struct host), 0x00);
+			if (recvo == 1 && ((char *)&host)[0] == '\0')
+				return ;
+			if (recvo == 0)
+			{
+				dprintf(1, "ERROR\n");
+			}
+			else
+			{
+				// reuse data buffer for print opt host
+				memset(data, '-', 3);
+				data[3] = '\0';
+				if ((host.opt & OPT_VALID) != 0)
+					data[1] = 'V';
+				local  = localtime(&host.last_connect);
+				strftime(lastconnect, sizeof(lastconnect), "%m/%d/%Y", local);
+				dprintf(1, "%s %s:%d %s ; ", \
+					data, inet_ntoa(host.ip), host.port, host.hash);
+				if (host.last_connect)
+				{
+					lasttime = (int)difftime(time(0x00), host.last_connect);
+					lasttime = lasttime / (60 * 60 * 24);
+					if (lasttime)
+						dprintf(1, "%d days (%s)\n", lasttime, lastconnect);
+					else
+						dprintf(1, "today (%s)\n", lastconnect);
+				}
+				else
+				{
+					dprintf(1, "Never\n");
+				}
+			}
+		}
+	}
 }

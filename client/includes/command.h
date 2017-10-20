@@ -9,5 +9,6 @@ struct			cmd
 
 // command.c
 void				c_addhost(short idcmd, char **arg);
+void				c_listhost(short idcmd, char **arg);
 
 #endif

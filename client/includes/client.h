@@ -1,6 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#define NSEC_REFRESH 10000000
+
 struct infod
 {
 	int			socket;

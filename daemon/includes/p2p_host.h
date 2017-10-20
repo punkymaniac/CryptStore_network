@@ -3,19 +3,7 @@
 
 #include <arpa/inet.h>
 
-#include "p2p_opt.h"
-
-#define NEVER 0
-
-struct host
-{
-	unsigned short		opt;
-	char							hash[20];
-	struct in_addr		ip;
-	unsigned short		port;
-	time_t						last_connect;
-	struct host				*next;
-};
+#include "glob/host_struct.h"
 
 // p2p_host.c
 struct host					*get_hosts(void);

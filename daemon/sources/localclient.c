@@ -98,3 +98,12 @@ void			control_client(struct timespec *timeout)
 		recv_local();
 	}
 }
+
+void			send_client(char *data, int size)
+{
+	int					*sockucli;
+
+	sockucli = get_socket();
+	if (send(*sockucli, data, size, 0) == -1)
+		perror("send error");
+}
